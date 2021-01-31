@@ -17,14 +17,22 @@ serv.bind(ADDR)
 server_private_number = 3
 
 
+def crypt(msg, key):
+    print("Encrypted message: {}".format(msg))
+    crypt_msg = ''
+    for c in msg:
+        crypt_msg += chr(ord(c) ^ key)
+    return crypt_msg
+
+
 # handle new connections
 def start():
     serv.listen(5)
     while True:
         conn, addr = serv.accept()
-
+        handshake = False
+        print("Client {} connected".format(addr))
         while True:
-            print("Client {} connected".format(addr))
             # getting the HEADER first. HEADER contains the message length
             find_msg_length = conn.recv(HEADER).decode(FORMAT)
             if not find_msg_length:
@@ -35,20 +43,19 @@ def start():
             data = conn.recv(find_msg_length).decode(FORMAT)
             if not data:
                 break
-            # hardcoded key length to check if it's matching the server key
-            if find_msg_length == 1:
-                client_key = json.loads(data)
-                if client_key == server_key:
-                    print("Keys are the same! TLS works :)")
-                break
             json_data = json.loads(data)
-            g, n, client_param = [int(e) for e in json_data]
-            print("Got client_param {} from client".format(client_param))
-            server_key = (client_param ** server_private_number) % n
-            print("Found key {}".format(server_key))
-            server_param = (g ** server_private_number) % n
-            print("Sending server_param {} to client".format(server_param))
-            conn.send(json.dumps(server_param).encode(FORMAT))
+            if not handshake:
+                # Diffie-Hellman handshake
+                handshake = True
+                g, n, client_param = [int(e) for e in json_data]
+                print("Got client_param {} from client".format(client_param))
+                server_key = (client_param ** server_private_number) % n
+                print("Found key {}".format(server_key))
+                server_param = (g ** server_private_number) % n
+                print("Sending server_param {} to client".format(server_param))
+                conn.send(json.dumps(server_param).encode(FORMAT))
+            else:
+                print(crypt(json_data, server_key))
         conn.close()
         print("Client {} disconnected".format(addr))
 
