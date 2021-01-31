@@ -1,11 +1,6 @@
 Poor's man PoC for TLS handshake
 
-```
-client.py - talks to the server and tries the TLS handshake
-main.py - contains the actual math demo
-server.py - listen on 8080 for a client
-```
-
+Description:
 ```
 The goal of TLS is to have the CLIENT and the SERVER agree on the same key. The key will be used to encrypt the traffic between them.
 
@@ -18,6 +13,21 @@ The goal of TLS is to have the CLIENT and the SERVER agree on the same key. The 
 
 Both the client and server have the same KEY. This KEY exchange algorithm is called Diffie–Hellman key exchange.
 ```
+Code:
+```
+client.py - talks to the server and tries the TLS handshake
+main.py - contains the actual math demo
+server.py - listen on 8080 for a client
+```
+Usage:
+```
+terminal_1 > python ./server.py
+```
+
+```
+terminal_2 > python ./client.py
+```
+
 Reference:
 
 https://www.youtube.com/watch?v=64geP_LAZ5U
