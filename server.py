@@ -1,5 +1,6 @@
 import socket
 import json
+from random import randint
 
 # message header
 HEADER = 64
@@ -14,7 +15,7 @@ ADDR = (HOST_IP, PORT)
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind(ADDR)
 
-server_private_number = 3
+server_private_number = randint(1, 100)
 
 
 def crypt(msg, key):
