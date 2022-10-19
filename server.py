@@ -1,6 +1,7 @@
 import socket
 import json
 from random import randint
+from _thread import *
 
 # message header
 HEADER = 64
@@ -28,43 +29,43 @@ def crypt(msg, key):
 
 
 # handle new connections
-def start():
+def start(conn):
+    handshake = False
     while True:
-        conn, addr = serv.accept()
-        handshake = False
-        print(f"Client {addr} connected.")
-        while True:
-            # getting the HEADER first. HEADER contains the message length
-            find_msg_length = conn.recv(HEADER).decode(FORMAT)
-            if not find_msg_length:
-                break
-            find_msg_length = int(find_msg_length)
-            if find_msg_length == 0:
-                break
-            # getting the actual message, after processing the HEADER
-            data = conn.recv(find_msg_length).decode(FORMAT)
-            if not data:
-                break
-            json_data = json.loads(data)
-            if not handshake:
-                # Diffie-Hellman handshake
-                handshake = True
-                g, n, client_param = [int(e) for e in json_data]
-                print(f"Got client_param {client_param} from client {addr}")
-                server_key = (client_param ** server_private_number) % n
-                print(f"Found key {server_key}")
-                server_param = (g ** server_private_number) % n
-                print(f"Sending server_param {server_param} to client {addr}")
-                conn.send(json.dumps(server_param).encode(FORMAT))
-            else:
-                print(f"{json_data['name']} sent: {crypt(json_data['data'], server_key)}")
-        conn.close()
-        print(f"Client {addr} disconnected!")
+        # getting the HEADER first. HEADER contains the message length
+        find_msg_length = conn.recv(HEADER).decode(FORMAT)
+        if not find_msg_length:
+            break
+        find_msg_length = int(find_msg_length)
+        if find_msg_length == 0:
+            break
+        # getting the actual message, after processing the HEADER
+        data = conn.recv(find_msg_length).decode(FORMAT)
+        if not data:
+            break
+        json_data = json.loads(data)
+        if not handshake:
+            # Diffie-Hellman handshake
+            handshake = True
+            g, n, client_param = [int(e) for e in json_data]
+            print(f"Got client_param {client_param} from client {addr}")
+            server_key = (client_param ** server_private_number) % n
+            print(f"Found key {server_key}")
+            server_param = (g ** server_private_number) % n
+            print(f"Sending server_param {server_param} to client {addr}")
+            conn.send(json.dumps(server_param).encode(FORMAT))
+        else:
+            print(f"{json_data['name']} sent: {crypt(json_data['data'], server_key)}")
+    conn.close()
+    print(f"Client {addr} disconnected!")
 
 
 print(f"Starting server on {ADDR}")
 try:
-    start()
+    while True:
+        conn, addr = serv.accept()
+        print(f"Client {addr} connected.")
+        start_new_thread(start, (conn,))
 except KeyboardInterrupt:
     print("Caught keyboard interrupt, exiting...")
 

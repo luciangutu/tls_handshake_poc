@@ -5,7 +5,6 @@ from random import randint
 # message header
 HEADER = 64
 FORMAT = 'utf-8'
-CLIENT_NAME = "John Doe"
 
 # network
 SERVER = socket.gethostname()
@@ -37,6 +36,8 @@ n = randint(1, 100)
 client_private_number = randint(1, 100)
 client_param = (g ** client_private_number) % n
 
+client_name = input("Enter your name: ")
+
 # Diffie-Hellman handshake
 # serialize the g, n and client parameter
 json_string = json.dumps([str(g), str(n), str(client_param)])
@@ -52,7 +53,7 @@ try:
     while True:
         value = input("Please enter a string to send: ")
         send(json.dumps({
-            "name": CLIENT_NAME,
+            "name": client_name,
             "data": crypt(value, client_key)
         }))
 except KeyboardInterrupt:
