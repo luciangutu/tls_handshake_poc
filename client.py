@@ -5,6 +5,7 @@ from random import randint
 # message header
 HEADER = 64
 FORMAT = 'utf-8'
+CLIENT_NAME = "John Doe"
 
 # network
 SERVER = socket.gethostname()
@@ -50,7 +51,10 @@ print(f"Found key {client_key}")
 try:
     while True:
         value = input("Please enter a string to send: ")
-        send(json.dumps(crypt(value, client_key)))
+        send(json.dumps({
+            "name": CLIENT_NAME,
+            "data": crypt(value, client_key)
+        }))
 except KeyboardInterrupt:
     print("Caught keyboard interrupt, exiting...")
 finally:
