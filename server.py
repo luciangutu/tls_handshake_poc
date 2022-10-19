@@ -19,7 +19,7 @@ server_private_number = randint(1, 100)
 
 
 def crypt(msg, key):
-    print("Encrypted message: {}".format(msg))
+    print(f"Encrypted message: {msg}")
     crypt_msg = ''
     for c in msg:
         crypt_msg += chr(ord(c) ^ key)
@@ -32,7 +32,7 @@ def start():
     while True:
         conn, addr = serv.accept()
         handshake = False
-        print("Client {} connected".format(addr))
+        print(f"Client {addr} connected.")
         while True:
             # getting the HEADER first. HEADER contains the message length
             find_msg_length = conn.recv(HEADER).decode(FORMAT)
@@ -49,17 +49,22 @@ def start():
                 # Diffie-Hellman handshake
                 handshake = True
                 g, n, client_param = [int(e) for e in json_data]
-                print("Got client_param {} from client".format(client_param))
+                print(f"Got client_param {client_param} from client")
                 server_key = (client_param ** server_private_number) % n
-                print("Found key {}".format(server_key))
+                print(f"Found key {server_key}")
                 server_param = (g ** server_private_number) % n
-                print("Sending server_param {} to client".format(server_param))
+                print(f"Sending server_param {server_param} to client")
                 conn.send(json.dumps(server_param).encode(FORMAT))
             else:
                 print(crypt(json_data, server_key))
         conn.close()
-        print("Client {} disconnected".format(addr))
+        print(f"Client {addr} disconnected")
 
 
-print("Starting server on {}".format(ADDR))
-start()
+print(f"Starting server on {ADDR}")
+try:
+    start()
+except KeyboardInterrupt:
+    print("Caught keyboard interrupt, exiting...")
+
+

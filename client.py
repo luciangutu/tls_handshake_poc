@@ -40,15 +40,18 @@ client_param = (g ** client_private_number) % n
 # serialize the g, n and client parameter
 json_string = json.dumps([str(g), str(n), str(client_param)])
 send(json_string)
-print("Sent client parameter {} to server".format(client_param))
+print(f"Sent client parameter {client_param} to server")
 from_server = client.recv(2048)
 server_param = json.loads(from_server)
-print("Got server_param {}".format(server_param))
+print(f"Got server_param {server_param}")
 client_key = (server_param ** client_private_number) % n
-print("Found key {}".format(client_key))
-while True:
-    value = raw_input("Please enter a string to send: ")
-    if value == "!exit":
-        break
-    send(json.dumps(crypt(value, client_key)))
-client.close()
+print(f"Found key {client_key}")
+
+try:
+    while True:
+        value = input("Please enter a string to send: ")
+        send(json.dumps(crypt(value, client_key)))
+except KeyboardInterrupt:
+    print("Caught keyboard interrupt, exiting...")
+finally:
+    client.close()
