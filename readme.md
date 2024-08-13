@@ -17,7 +17,7 @@ Both the client and server have the same KEY. This KEY exchange algorithm is cal
 ### Code
 [**client.py**](client.py) - talks to the server and tries the TLS handshake\
 [**main.py**](main.py) - contains the actual math demo\
-[**server.py**](server.py) - listen on 8080 for a client
+[**server.py**](server.py) - listen on 8080 for clients
 
 ### Usage
 Start the server:
