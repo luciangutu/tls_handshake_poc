@@ -2,7 +2,9 @@ import socket
 import json
 from random import randint
 
-# message header
+# message format
+VERSION_BUFF_SIZE = 1
+VERSION = 2
 HEADER = 64
 FORMAT = 'utf-8'
 
@@ -20,6 +22,12 @@ def send(msg):
     message = msg.encode(FORMAT)
     msg_length = str(len(message)).encode(FORMAT)
     msg_length += b' ' * (HEADER - len(msg_length))
+
+    # Convert version to a string and ensure it's 1 byte in length
+    msg_version = str(VERSION).encode(FORMAT)[:VERSION_BUFF_SIZE]
+
+    # Send the version, header, and the actual message
+    client.send(msg_version)
     client.send(msg_length)
     client.send(message)
 
@@ -43,8 +51,11 @@ client_name = input("Enter your name: ")
 json_string = json.dumps([str(g), str(n), str(client_param)])
 send(json_string)
 print(f"Sent client parameter {client_param} to server")
-from_server = client.recv(2048)
+from_server = client.recv(2048).decode(FORMAT)
 server_param = json.loads(from_server)
+if isinstance(server_param, dict) and server_param.get('status') == 'error':
+    raise ValueError(server_param)
+
 print(f"Got server_param {server_param}")
 client_key = (server_param ** client_private_number) % n
 print(f"Found key {client_key}")
